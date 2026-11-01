@@ -44,11 +44,12 @@ Two things worth knowing before you pick numbers:
 ---
 ## 1.
 
-<!-- Your criterion. It must name a number. -->
+For each of three trials, no more than 1 of 10 pieces of my own human-written text is labelled high-confidence AI.
 
 
 
 **Why this target:**
+A false accusation can harm a writer more than a missed AI-generated passage harms the site, so the high-confidence AI label should be rare on work I know is mine. Requiring the limit in every trial prevents a good average from hiding an inconsistent run.
 
 
 
@@ -56,11 +57,12 @@ Two things worth knowing before you pick numbers:
 
 ## 2.
 
-<!-- Your criterion. -->
+In each of three trials, the mean combined score for 5 clearly AI-written samples is at least 0.20 higher than the mean combined score for 5 clearly human-written samples.
 
 
 
 **Why this target:**
+A measurable gap shows the combined score distinguishes the two calibration groups, while a 0.20 margin is large enough to be useful rather than a tiny difference lost in model variation.
 
 
 
@@ -68,11 +70,12 @@ Two things worth knowing before you pick numbers:
 
 ## 3.
 
-<!-- Your criterion. -->
+Across three trials on the same 5 calibration samples, the service returns at least one `human`, one `unsure`, and one `ai` label in every trial.
 
 
 
 **Why this target:**
+All three labels need to be reachable for the unsure band to serve as a real alternative to an accusation, not just an unused code path. Repeating the same samples checks that model variation does not make a label disappear.
 
 
 
@@ -80,11 +83,12 @@ Two things worth knowing before you pick numbers:
 
 ## 4.
 
-<!-- Your criterion. -->
+For 5 appeals against existing submissions, every request returns HTTP 200 and adds an audit entry for the same `content_id` with `event: "appeal"` and `status: "under_review"`; each original decision remains in the log.
 
 
 
 **Why this target:**
+A writer needs a reliable way to challenge a wrong result, and an append-only record preserves both the original decision and the review request for later follow-up.
 
 
 
@@ -92,11 +96,12 @@ Two things worth knowing before you pick numbers:
 
 ## 5.
 
-<!-- Your criterion. -->
+Missing, null, non-string, or blank `text` values return a JSON 4xx response. Text longer than 100,000 characters returns a JSON 4xx response. None of these requests returns 5xx, and `GET /health` still returns HTTP 200 afterward.
 
 
 
 **Why this target:**
+Invalid input should be rejected clearly before it reaches the model, while a documented size limit prevents oversized submissions from consuming unbounded resources. Keeping the service healthy after these requests guards against malformed input crashing the route or process.
 
 
 
