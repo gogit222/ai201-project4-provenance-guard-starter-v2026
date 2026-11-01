@@ -48,14 +48,11 @@ DETECTOR_MAX_TOKENS = 400
 
 
 # ─── Scoring (Milestone 4) ───────────────────────────────────────────────────
-# How much each signal counts toward the combined score.
-#
-# ⚠️ These are placeholders. Milestone 4 asks you to write your combining rule
-# down BEFORE you code it, and to put the numbers in your README. Whatever you
-# decide, it goes here.
+# How much each signal counts toward the combined score. The model signal gets
+# slightly more weight because the style measures are shallow and easy to alter.
 
-WEIGHT_MODEL_SIGNAL = 0.5
-WEIGHT_STYLE_SIGNAL = 0.5
+WEIGHT_MODEL_SIGNAL = 0.6
+WEIGHT_STYLE_SIGNAL = 0.4
 
 
 # ─── Thresholds (Milestone 5) ────────────────────────────────────────────────

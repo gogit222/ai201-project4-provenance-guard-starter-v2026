@@ -31,6 +31,8 @@ from flask import Flask, jsonify, request
 import audit
 import config
 import detector
+import scoring
+import stylometry
 
 app = Flask(__name__)
 
@@ -227,6 +229,7 @@ def submit():
 
     try:
         model_score = detector.model_signal(text)
+        style_score = stylometry.style_signal(text)
     except ValueError as exc:
         return jsonify({
             "error": "text_cannot_be_scored",
@@ -238,24 +241,28 @@ def submit():
             "message": str(exc),
         }), 503
 
+    combined_score = scoring.combine_signals(model_score, style_score)
     content_id = str(uuid.uuid4())
-    guess = "ai" if model_score >= 0.5 else "human"
+    guess = "ai" if combined_score >= 0.5 else "human"
     label = "Pending combined scoring and final label mapping."
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id.strip(),
         guess=guess,
         model_score=model_score,
+        style_score=style_score,
+        combined_score=combined_score,
         status="decided",
     )
 
     return jsonify({
         "content_id": content_id,
         "guess": guess,
-        "confidence": None,
+        "confidence": combined_score,
         "label": label,
         "model_score": model_score,
-        "style_score": None,
+        "style_score": style_score,
+        "combined_score": combined_score,
     })
 
 

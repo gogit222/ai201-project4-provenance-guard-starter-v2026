@@ -53,35 +53,47 @@
 
 ### Signal one — the model signal
 
-**What it measures:**
+**What it measures:** GPT-2 perplexity, mapped to a 0–1 score; higher means the text is more predictable and more AI-like.
 
-**Why that might differ between human and AI writing:**
+**Why that might differ between human and AI writing:** Generated text often follows likely next-word patterns, making it easier for a language model to predict.
 
-**What it can't see:**
+**What it can't see:** Predictability does not establish authorship. Plain conventional human writing can be predictable, while unusual human writing can surprise the model. It only scores the first 400 tokens.
 
 ### Signal two — the style signal
 
-**What it measures:**
+**What it measures:** Sentence-length variation (coefficient of variation) and vocabulary repetition (one minus type-token ratio), averaged into a 0–1 AI-likelihood score. Punctuation density is reported for inspection but is not scored because its direction alone is unreliable.
 
-**Why that might differ between human and AI writing:**
+**Why that might differ between human and AI writing:** Generated prose may use more even sentence lengths and repeat a narrower vocabulary; higher variation and more unique words therefore lower this heuristic score.
 
-**What it can't see:**
+**What it can't see:** It cannot understand meaning or verify authorship. Genre, text length, quotations, typos, and sentence splitting can all change these measurements without changing who wrote the text.
 
 ### The combining rule
 
 <!-- Write the rule in words, then give the numbers. What happens when the two
      signals disagree? -->
 
-**The rule:**
+**The rule:** Take a weighted average. If the signals disagree, the combined score moves between them rather than allowing either signal to decide alone. This makes disagreement less likely to produce a high-confidence accusation.
 
-**The numbers:**
+**The numbers:** `0.60 × model_score + 0.40 × style_score`. The existing human and AI thresholds remain `0.35` and `0.65`.
 
 **Where it lives:** `scoring.py::combine_signals`
 
 <!-- ⚠️ The grader checks your code against that line. If your rule lives
      somewhere else, say where. -->
 
-**A case where my two signals split, and what my rule does with it:**
+**A case where my two signals split, and what my rule does with it:** On lightly edited AI text, the model score was `0.4271` while the style score was `0.5057`. The weighted score is `0.4585`, in the unsure band; the style signal nudges the result upward, but the disagreement does not become an AI accusation.
+
+Calibration readings (model score / style score):
+
+| Input | Model | Style |
+|---|---:|---:|
+| Input | Model | Style | Combined |
+|---|---:|---:|---:|
+| AI-style comparison text / clearly AI | 0.6771 | 0.5098 | 0.6102 |
+| User-provided human-authored text / clearly human | 0.1405 | 0.4041 | 0.2459 |
+| Conversational middle text | 0.4019 | 0.4059 | 0.4035 |
+| Formal human sample | 0.0531 | 0.4511 | 0.2123 |
+| Lightly edited AI | 0.4271 | 0.5057 | 0.4585 |
 
 
 
@@ -121,12 +133,12 @@ existing debug server on port 5000 reset the connection when the first model
 inference ran.
 
 ```powershell
-$body = '{"text":"The implementation of this system requires careful consideration of several important factors. First, the service should validate incoming data to ensure reliable processing. Additionally, each stage should provide consistent results and maintain clear records. By following these principles, the system can deliver an effective and user-friendly experience.","creator_id":"sample_writer_01"}'
+$body = '{"text":"The implementation of this system requires careful consideration of several important factors. First, the service should validate incoming data to ensure reliable processing. Additionally, each stage should provide consistent results and maintain clear records. By following these principles, the system can deliver an effective and user-friendly experience.","creator_id":"milestone4_curl"}'
 $body | curl.exe -i -X POST http://127.0.0.1:5001/submit -H "Content-Type: application/json" --data-binary '@-'
 ```
 
 ```json
-{"confidence":null,"content_id":"e09fb912-3fe5-4c54-b123-c77788bb8954","guess":"ai","label":"Pending combined scoring and final label mapping.","model_score":0.6771,"style_score":null}
+{"combined_score":0.6102,"confidence":0.6102,"content_id":"adf3f7f0-5877-4c65-9518-e0956b75739b","guess":"ai","label":"Pending combined scoring and final label mapping.","model_score":0.6771,"style_score":0.5098}
 ```
 
 **The audit log after submission**
@@ -136,7 +148,7 @@ curl.exe -i "http://127.0.0.1:5001/log?limit=1"
 ```
 
 ```json
-{"count":1,"entries":[{"combined_score":null,"content_id":"e09fb912-3fe5-4c54-b123-c77788bb8954","creator_id":"sample_writer_01","guess":"ai","label":null,"model_score":0.6771,"status":"decided","style_score":null,"timestamp":"2026-11-01T12:47:07+00:00"}]}
+{"count":1,"entries":[{"combined_score":0.6102,"content_id":"adf3f7f0-5877-4c65-9518-e0956b75739b","creator_id":"milestone4_curl","guess":"ai","label":null,"model_score":0.6771,"status":"decided","style_score":0.5098,"timestamp":"2026-11-01T13:00:07+00:00"}]}
 ```
 
 **An appeal**
