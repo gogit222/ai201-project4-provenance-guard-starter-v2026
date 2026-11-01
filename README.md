@@ -116,19 +116,27 @@
 
 **A submission**
 
-<!-- The response needs content_id, guess, confidence, label, AND both
-     signal scores - model_score and style_score. Unit 8's tools read those
-     two off the response, so leaving them out costs you next unit's
-     diagnostics. -->
+This sample was tested on a temporary non-debug server at port 5001. The
+existing debug server on port 5000 reset the connection when the first model
+inference ran.
 
-```bash
-$ curl -X POST http://127.0.0.1:5000/submit \
-  -H "Content-Type: application/json" \
-  -d '{"text": "...", "creator_id": "..."}'
+```powershell
+$body = '{"text":"The implementation of this system requires careful consideration of several important factors. First, the service should validate incoming data to ensure reliable processing. Additionally, each stage should provide consistent results and maintain clear records. By following these principles, the system can deliver an effective and user-friendly experience.","creator_id":"sample_writer_01"}'
+$body | curl.exe -i -X POST http://127.0.0.1:5001/submit -H "Content-Type: application/json" --data-binary '@-'
 ```
 
 ```json
+{"confidence":null,"content_id":"e09fb912-3fe5-4c54-b123-c77788bb8954","guess":"ai","label":"Pending combined scoring and final label mapping.","model_score":0.6771,"style_score":null}
+```
 
+**The audit log after submission**
+
+```powershell
+curl.exe -i "http://127.0.0.1:5001/log?limit=1"
+```
+
+```json
+{"count":1,"entries":[{"combined_score":null,"content_id":"e09fb912-3fe5-4c54-b123-c77788bb8954","creator_id":"sample_writer_01","guess":"ai","label":null,"model_score":0.6771,"status":"decided","style_score":null,"timestamp":"2026-11-01T12:47:07+00:00"}]}
 ```
 
 **An appeal**
