@@ -39,7 +39,13 @@
 <!-- The path a submission takes, from arriving to the label a reader sees.
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
 
-
+1. A writer sends `POST /submit` with JSON containing `text` and `creator_id`.
+2. The route checks the JSON fields and rejects blank or over-100,000-character text; the detector rejects text that is too short to score.
+3. `detector.model_signal` measures how predictable the text is to GPT-2 and returns a 0–1 score; higher means more AI-like.
+4. `stylometry.style_signal` measures sentence-length variation and vocabulary repetition. It also computes punctuation density for inspection, but does not include that measure in its score.
+5. `scoring.combine_signals` calculates `0.60 × model_score + 0.40 × style_score`; disagreement pulls the result between the two signals.
+6. `scoring.score_to_label` maps scores through the configured bands: 0.35 or lower is human, above 0.35 and below 0.65 is unsure, and 0.65 or higher is AI. It supplies both a machine-readable guess and the sentence a reader sees.
+7. The route generates a `content_id`, writes the scores and decision to `logs/audit.jsonl`, and returns them with the label. A writer can later send that ID and their reasoning to `POST /appeal`; the appeal is appended to the log with `under_review` status.
 
 ---
 
@@ -83,10 +89,8 @@
 
 **A case where my two signals split, and what my rule does with it:** On lightly edited AI text, the model score was `0.4271` while the style score was `0.5057`. The weighted score is `0.4585`, in the unsure band; the style signal nudges the result upward, but the disagreement does not become an AI accusation.
 
-Calibration readings (model score / style score):
+Calibration readings (model, style, and combined scores):
 
-| Input | Model | Style |
-|---|---:|---:|
 | Input | Model | Style | Combined |
 |---|---:|---:|---:|
 | AI-style comparison text / clearly AI | 0.6771 | 0.5098 | 0.6102 |
@@ -108,16 +112,16 @@ Calibration readings (model score / style score):
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human |  |  |
-| unsure |  |  |
-| high-confidence AI |  |  |
+| high-confidence human | 0.00 <= score <= 0.35 | We think this was probably written by a person. |
+| unsure | 0.35 < score < 0.65 | We can't tell confidently whether this was written by a person or with AI. |
+| high-confidence AI | 0.65 <= score <= 1.00 | We think this was probably written with AI, but this estimate can be wrong. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
      sounding like an accusation, because the person reading it may well have
      written every word themselves. -->
 
-
+It says plainly that the system cannot tell, rather than treating an uncertain score as an accusation.
 
 ---
 
@@ -133,12 +137,12 @@ existing debug server on port 5000 reset the connection when the first model
 inference ran.
 
 ```powershell
-$body = '{"text":"The implementation of this system requires careful consideration of several important factors. First, the service should validate incoming data to ensure reliable processing. Additionally, each stage should provide consistent results and maintain clear records. By following these principles, the system can deliver an effective and user-friendly experience.","creator_id":"milestone4_curl"}'
+$body = '{"text":"The implementation of this system requires careful consideration of several important factors. First, the service should validate incoming data to ensure reliable processing. Additionally, each stage should provide consistent results and maintain clear records. By following these principles, the system can deliver an effective and user-friendly experience.","creator_id":"label_http_unsure"}'
 $body | curl.exe -i -X POST http://127.0.0.1:5001/submit -H "Content-Type: application/json" --data-binary '@-'
 ```
 
 ```json
-{"combined_score":0.6102,"confidence":0.6102,"content_id":"adf3f7f0-5877-4c65-9518-e0956b75739b","guess":"ai","label":"Pending combined scoring and final label mapping.","model_score":0.6771,"style_score":0.5098}
+{"combined_score":0.6102,"confidence":0.6102,"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","guess":"unsure","label":"We can't tell confidently whether this was written by a person or with AI.","model_score":0.6771,"style_score":0.5098}
 ```
 
 **The audit log after submission**
@@ -148,29 +152,28 @@ curl.exe -i "http://127.0.0.1:5001/log?limit=1"
 ```
 
 ```json
-{"count":1,"entries":[{"combined_score":0.6102,"content_id":"adf3f7f0-5877-4c65-9518-e0956b75739b","creator_id":"milestone4_curl","guess":"ai","label":null,"model_score":0.6771,"status":"decided","style_score":0.5098,"timestamp":"2026-11-01T13:00:07+00:00"}]}
+{"count":1,"entries":[{"combined_score":0.6102,"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","creator_id":"label_http_unsure","guess":"unsure","label":"We can't tell confidently whether this was written by a person or with AI.","model_score":0.6771,"status":"decided","style_score":0.5098,"timestamp":"2026-11-01T13:09:11+00:00"}]}
 ```
 
 **An appeal**
 
-```bash
-$ curl -X POST http://127.0.0.1:5000/appeal \
-  -H "Content-Type: application/json" \
-  -d '{"content_id": "...", "reasoning": "..."}'
+```powershell
+$body = '{"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","reasoning":"I wrote this submission myself and would like a person to review the result."}'
+$body | curl.exe -i http://127.0.0.1:5001/appeal -H "Content-Type: application/json" --data-binary '@-'
 ```
 
 ```json
-
+{"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","message":"Your appeal has been recorded and the submission is under review.","ok":true,"status":"under_review"}
 ```
 
 **What the log shows afterwards**
 
-```bash
-$ curl "http://127.0.0.1:5000/log?limit=3"
+```powershell
+curl.exe -i "http://127.0.0.1:5001/log?limit=2"
 ```
 
 ```json
-
+{"count":2,"entries":[{"combined_score":0.6102,"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","creator_id":"label_http_unsure","guess":"unsure","label":"We can't tell confidently whether this was written by a person or with AI.","model_score":0.6771,"status":"decided","style_score":0.5098,"timestamp":"2026-11-01T13:09:11+00:00"},{"content_id":"037d8569-78ca-4b49-9bee-1e518db313a0","creator_id":"label_http_unsure","event":"appeal","reasoning":"I wrote this submission myself and would like a person to review the result.","status":"under_review","timestamp":"2026-11-01T13:09:16+00:00"}]}
 ```
 
 ---
@@ -179,15 +182,15 @@ $ curl "http://127.0.0.1:5000/log?limit=3"
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Help implement the second signal and choose how to combine it with the local model score, with the rule written down before coding.
+- *What came back:* A style score based on sentence-length variation and vocabulary repetition, plus the suggestion to keep punctuation density diagnostic because its direction is not dependable on its own. The first calibration results also showed formal human text scoring low on the model signal but higher on the style signal.
+- *What I changed:* I ran the CLI and both signals on the same passages, retained punctuation as a diagnostic rather than a scored measure, and chose `0.60` model / `0.40` style weights to keep the shallow style signal from dominating. I recorded the observed split and formula in Signals and Scoring.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Help implement reader-facing labels and an appeal path, and verify that a writer's appeal appears in the audit log beside the original decision.
+- *What came back:* A `score_to_label` mapping for the configured ranges and an appeal handler that looks up the original content, records an append-only `under_review` event, and returns a confirmation.
+- *What I changed:* I tested all three labels through HTTP, appealed a real `content_id`, checked the paired entries with `GET /log`, and copied the actual responses into Sample Run. I kept the original decision unchanged so the log preserves the full history.
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
