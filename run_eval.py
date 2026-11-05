@@ -66,6 +66,16 @@ def describe(body):
     return json.dumps(body)[:120]
 
 
+def response_json(response):
+    """Return a decoded response body, preserving non-JSON failures for reports."""
+    if not response.content:
+        return {}, None
+    try:
+        return response.json(), None
+    except ValueError as exc:
+        return None, f"{type(exc).__name__}: {exc}"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -118,21 +128,95 @@ def main():
                 try:
                     response = requests.post(f"{args.url}/submit", json=body,
                                              timeout=args.timeout)
-                    payload = response.json() if response.content else {}
-                    results.append({
-                        "status": response.status_code,
-                        "guess": payload.get("guess"),
-                        "confidence": payload.get("confidence"),
-                        "model_score": payload.get("model_score"),
-                        "style_score": payload.get("style_score"),
-                        "label": payload.get("label"),
+                    payload, parse_error = response_json(response)
+                    result = {
+                        "status": response.status_code if not parse_error else None,
                         "sent": preview,
-                    })
+                        "response": payload,
+                    }
+                    if parse_error:
+                        result["http_status"] = response.status_code
+                        result["error"] = parse_error
+                    if isinstance(payload, dict):
+                        result.update({
+                            "content_id": payload.get("content_id"),
+                            "guess": payload.get("guess"),
+                            "confidence": payload.get("confidence"),
+                            "model_score": payload.get("model_score"),
+                            "style_score": payload.get("style_score"),
+                            "label": payload.get("label"),
+                        })
+                    groups = scenario.get("groups", [])
+                    if i <= len(groups):
+                        result["group"] = groups[i - 1]
+
+                    if scenario.get("appeal_reasoning") and result.get("content_id"):
+                        appeal_response = requests.post(
+                            f"{args.url}/appeal",
+                            json={
+                                "content_id": result["content_id"],
+                                "reasoning": scenario["appeal_reasoning"],
+                            },
+                            timeout=args.timeout,
+                        )
+                        appeal_payload, appeal_error = response_json(appeal_response)
+                        result["appeal"] = {
+                            "http_status": appeal_response.status_code,
+                            "response": appeal_payload,
+                        }
+                        if appeal_error:
+                            result["appeal"]["error"] = appeal_error
+
+                        log_response = requests.get(
+                            f"{args.url}/log", params={"limit": 200},
+                            timeout=args.timeout,
+                        )
+                        log_payload, log_error = response_json(log_response)
+                        entries = log_payload.get("entries", []) if isinstance(log_payload, dict) else []
+                        related = [
+                            entry for entry in entries
+                            if entry.get("content_id") == result["content_id"]
+                        ]
+                        result["audit_entries"] = related
+                        result["checks"] = {
+                            "appeal_http_200": appeal_response.status_code == 200,
+                            "appeal_recorded": any(
+                                entry.get("event") == "appeal"
+                                and entry.get("status") == "under_review"
+                                for entry in related
+                            ),
+                            "original_decision_preserved": any(
+                                entry.get("event") != "appeal"
+                                and entry.get("status") == "decided"
+                                for entry in related
+                            ),
+                        }
+                        if log_error:
+                            result["audit_error"] = log_error
+                    results.append(result)
                 except Exception as exc:  # noqa: BLE001
                     results.append({"status": None, "error": f"{type(exc).__name__}: {exc}",
                                     "sent": preview})
 
-            trials.append(results)
+            trial_result = {"results": results}
+            if scenario.get("health_after"):
+                try:
+                    health_response = requests.get(
+                        f"{args.url}/health", timeout=5
+                    )
+                    health_payload, health_error = response_json(health_response)
+                    trial_result["health_after"] = {
+                        "status": health_response.status_code,
+                        "response": health_payload,
+                    }
+                    if health_error:
+                        trial_result["health_after"]["error"] = health_error
+                except Exception as exc:  # noqa: BLE001
+                    trial_result["health_after"] = {
+                        "status": None,
+                        "error": f"{type(exc).__name__}: {exc}",
+                    }
+            trials.append(trial_result)
             guesses = [r.get("guess") or "—" for r in results]
             print(f"  trial {trial}: {', '.join(guesses)}")
 
