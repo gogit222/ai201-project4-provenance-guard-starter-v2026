@@ -227,16 +227,40 @@ can look like one. -->
 
 
 
-**Ten audit log entries from the run**
+**Ten selected audit log entries**
 
 <!-- Choose entries that show the interesting failures, not the ten easiest. -->
 
-```json
+The attack-set run recorded only the two rate-limit rejections for RQ10 and
+RQ11 below. Its connection resets and other 400 responses did not produce
+audit entries. The other eight records are from the Milestone 1 flood test at
+02:07 UTC: three accepted decisions and five rate-limit rejections. These are
+verbatim entries from the audit log; rejected requests correctly have fewer
+fields than decisions.
 
+
+```json
+[
+     {"timestamp":"2026-11-05T02:07:24+00:00","content_id":"4f81cee1-368e-4016-ab94-6e1438245e6e","creator_id":"flood_tester","guess":"human","model_score":0.2587,"style_score":0.3356,"combined_score":0.2895,"label":"We think this was probably written by a person.","status":"decided"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","content_id":"46c1f89b-c1bf-4273-a052-afd965ac4564","creator_id":"flood_tester","guess":"human","model_score":0.2587,"style_score":0.3356,"combined_score":0.2895,"label":"We think this was probably written by a person.","status":"decided"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","content_id":"152e1614-9384-4400-a1b0-35ed0edc828a","creator_id":"flood_tester","guess":"human","model_score":0.2587,"style_score":0.3356,"combined_score":0.2895,"label":"We think this was probably written by a person.","status":"decided"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","creator_id":"flood_tester","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","creator_id":"flood_tester","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","creator_id":"flood_tester","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","creator_id":"flood_tester","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T02:07:24+00:00","creator_id":"flood_tester","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T13:36:22+00:00","creator_id":"unknown","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"},
+     {"timestamp":"2026-11-05T13:36:32+00:00","creator_id":"unknown","event":"rejected","status":"rejected","reason":"rate_limited","limit":"5 per 1 minute"}
+]
 ```
 
 **The single worst outcome** — the one I'd least want to explain to a writer
 whose work got caught by it:
+FP01, a plain and clear human-writing test, got a connection reset instead of
+a result. That is the outcome I would least want to explain: the writer gets
+neither a decision nor a usable appeal path. The run did not score FP01 or the
+other false-positive cases, so it does not establish that the detector falsely
+accused them; it shows the service failed before deciding.
 
 
 
