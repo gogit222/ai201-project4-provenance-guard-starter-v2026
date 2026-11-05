@@ -192,6 +192,12 @@ curl.exe -i "http://127.0.0.1:5001/log?limit=2"
 - *What came back:* A `score_to_label` mapping for the configured ranges and an appeal handler that looks up the original content, records an append-only `under_review` event, and returns a confirmation.
 - *What I changed:* I tested all three labels through HTTP, appealed a real `content_id`, checked the paired entries with `GET /log`, and copied the actual responses into Sample Run. I kept the original decision unchanged so the log preserves the full history.
 
+**Moment 3**
+
+- *What I asked for:* Help interpret this unit's attack and evaluation reports, especially whether a failed request meant an attack bypassed the detector.
+- *What came back:* The reports distinguish scored decisions from connection resets and HTTP 500s. The reset attack families have no scores, so they cannot honestly be called successful evasions or false positives; the evaluation also showed the AI-like calibration samples landing in the unsure band.
+- *What I changed:* I used the recorded outcomes to separate confirmed behavior from unknowns in What's Still Broken. I did not claim a detector fix or tune thresholds without a complete, stable rerun, and I recorded the remaining validation work and its tradeoff.
+
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 15 submissions as 'flood_tester' against http://127.0.0.1:5000
 The first one is slow while the model loads.
@@ -354,12 +360,66 @@ that produced it:
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+The before attack run did not produce scores for EV01-EV10 (evasion), FP01-FP08
+(human false-positive cases), or PI01-PI06 (prompt injection): all 24 requests
+ended in connection resets. I would first fix and rerun the inference/service
+path, then inspect the scores and labels for each family; until that rerun,
+these cases are untested, not proven detector bypasses or false accusations.
+I stopped because the available run had no classification evidence, and I ran
+out of time to get a stable full run.
+
+MF03-MF08 all returned HTTP 200. That includes control-character-only and
+punctuation-only text labeled human, plus a long single word, emoji-only text,
+right-to-left text, and a 60,000-character submission labeled AI. I would
+define and test a minimum meaningful-text policy for control-only and
+punctuation-only input, while explicitly deciding what languages and symbol
+content the service supports; the current bad-input criterion only covers
+missing, null, non-string, blank, and over-limit text. I stopped short of
+changing the route because these accepted cases were outside that criterion
+and a language policy needs a product decision.
+
+The flood test allowed the first five requests from one creator and returned
+429 for later requests, so the configured 5-per-minute limit did stop the
+burst. The first five are still accepted by design; for a real deployment I
+would add shared, persistent rate-limit storage so separate service workers
+cannot each grant a fresh allowance. I did not test multiple workers in this
+unit.
+
+Criterion 2, the 0.20 mean score-gap target, is not established across all
+three trials: successful samples showed a useful gap, but an AI sample returned
+HTTP 500 in one trial, leaving that five-versus-five comparison incomplete. I
+would fix the intermittent inference failure and rerun all three complete
+trials; I stopped before making a scoring change because the available scores
+do not show that the thresholds caused the missing result.
+
+Criterion 3, label coverage, was missed: the calibration set returned human
+and unsure, but no high-confidence AI label in the recorded trials. The two
+AI-like samples scored 0.5898 and 0.6383, below the 0.65 AI cutoff. I would
+collect more labeled examples and validate a threshold adjustment against
+human false positives before changing it; I stopped because lowering the cutoff
+without that check could turn the known uncertainty into wrong accusations.
+
+Criterion 4, the appeal round-trip, was missed in a trial when two submissions
+returned HTTP 500, so they never produced content IDs to appeal. The successful
+appeals were recorded correctly and preserved the original decisions. I would
+stabilize inference and rerun the full five-appeal trial; I stopped rather than
+mistake a failed submission for an appeal-handler defect.
+
+Criteria 1 and 5 passed in the recorded evaluation: the known-human samples
+were not labeled high-confidence AI, and missing, null, non-string, blank, and
+over-limit requests returned 4xx responses while health stayed at 200.
 
 
 **The trade I'd make if this ran for real:**
 
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
+
+I would favor fewer false accusations: keep the high-confidence AI label
+conservative and send borderline work to human review, even though more AI text
+will pass as human or remain unsure. The site pays through extra review effort
+and some missed AI submissions, while writers avoid bearing the larger cost of
+being wrongly accused by an unreliable detector.
 
 
 
