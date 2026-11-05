@@ -193,22 +193,45 @@ curl.exe -i "http://127.0.0.1:5001/log?limit=2"
 - *What I changed:* I tested all three labels through HTTP, appealed a real `content_id`, checked the paired entries with `GET /log`, and copied the actual responses into Sample Run. I kept the original decision unchanged so the log preserves the full history.
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
+15 submissions as 'flood_tester' against http://127.0.0.1:5000
+The first one is slow while the model loads.
 
+  [ 1/15] 200
+  [ 2/15] 200
+  [ 3/15] 200
+  [ 4/15] 200
+  [ 5/15] 200
+  [ 6/15] 429
+  [ 7/15] 429
+  [ 8/15] 429
+  [ 9/15] 429
+  [10/15] 429
+  [11/15] 429
+  [12/15] 429
+  [13/15] 429
+  [14/15] 429
+  [15/15] 429
+
+============================================================
+200 200 200 200 200 429 429 429 429 429 429 429 429 429 429
+============================================================
+
+10 of 15 were rate limited.
 ---
 
 ## Rate Limiting
 
-**My limits:** ___ per minute, ___ per day
+
+
+**My limits:** 5 per minute, 30 per day
 
 **Why those numbers and not others:**
-<!-- Think about two people: a real writer submitting their own work a few
-     times an hour, and a script sending a thousand variations to map your
-     thresholds. Your numbers have to be liveable for the first and hostile to
-     the second. -->
+A writer can submit several revisions in an hour and still has room for 30
+submissions in a day. A script probing one identity can make only five attempts
+in a minute and 30 in a day, far short of a thousand variations.
 
-**What a caller counts as:** <!-- per address, or per creator_id? They fail
-differently — one script can look like a thousand callers, and one household
-can look like one. -->
+**What a caller counts as:** `creator_id`, falling back to the caller's address
+when no usable ID is provided.
 
 **The run of status codes when I pushed past it:**
 
