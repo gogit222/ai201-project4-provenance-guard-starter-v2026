@@ -1,0 +1,1219 @@
+# Attack run — before
+
+- Produced by: `run_attacks.py::main`
+- Service: `app.py::submit`
+- 56 attacks · 2026-11-05 09:49
+- Auto-marked BROKE (5xx, crash, no response): **25**
+- Left for you to judge: **31**
+
+The Verdict column is blank where a script can't honestly decide. Whether
+an evasion worked depends on where you put your thresholds — read the
+`targets` column, look at what came back, and write HELD or BROKE yourself.
+
+Each attack submits as creator_id `attacker_<id>`, and the content_id it
+came back with is in the table — either one will match this run against your
+audit log when you go looking for the ten entries to paste.
+
+| ID | Family | Targeting | Status | Content ID | Guess | Score | Verdict |
+|---|---|---|---|---|---|---|---|
+| EV01 | evasion | signal two: typos raise word variety | — | `—` | — | — | BROKE |
+| EV02 | evasion | signal two: broken-up sentences raise length spread | — | `—` | — | — | BROKE |
+| EV03 | evasion | signal two: a pasted quotation changes the shape | — | `—` | — | — | BROKE |
+| EV04 | evasion | signal one: unusual words raise perplexity | — | `—` | — | — | BROKE |
+| EV05 | evasion | both signals: heavy human editing pass | — | `—` | — | — | BROKE |
+| EV06 | evasion | signal two: one very long sentence and one very short | — | `—` | — | — | BROKE |
+| EV07 | evasion | signal two: padding with punctuation | — | `—` | — | — | BROKE |
+| EV08 | evasion | signal one: text below the token window | — | `—` | — | — | BROKE |
+| EV09 | evasion | both: AI text with a human opening paragraph bolted on | — | `—` | — | — | BROKE |
+| EV10 | evasion | signal two: repeated stanza structure | — | `—` | — | — | BROKE |
+| FP01 | false_positive | plain, clear human writing with no flourishes | — | `—` | — | — | BROKE |
+| FP02 | false_positive | human writing in a formal register | — | `—` | — | — | BROKE |
+| FP03 | false_positive | a non-native English speaker writing carefully | — | `—` | — | — | BROKE |
+| FP04 | false_positive | a student essay written to a rubric | — | `—` | — | — | BROKE |
+| FP05 | false_positive | technical documentation written by a person | — | `—` | — | — | BROKE |
+| FP06 | false_positive | a person imitating a formal template | — | `—` | — | — | BROKE |
+| FP07 | false_positive | human writing that repeats a phrase deliberately | — | `—` | — | — | BROKE |
+| FP08 | false_positive | very short genuine human submission | — | `—` | — | — | BROKE |
+| PI01 | prompt_injection | instruction to ignore the check | — | `—` | — | — | BROKE |
+| PI02 | prompt_injection | instruction disguised as a system message | — | `—` | — | — | BROKE |
+| PI03 | prompt_injection | instruction wrapped in the writer's voice | — | `—` | — | — | BROKE |
+| PI04 | prompt_injection | attempt to make the label text hostile | — | `—` | — | — | BROKE |
+| PI05 | prompt_injection | attempt to inject into the audit log | — | `—` | — | — | BROKE |
+| PI06 | prompt_injection | instruction plus real human text | — | `—` | — | — | BROKE |
+| MF01 | malformed | text is only whitespace | 400 | `—` | — | — |  |
+| MF02 | malformed | text is a single character | — | `—` | — | — | BROKE |
+| MF03 | malformed | text is control characters | 200 | `995df7c0-6695-470d-8d63-7a02694db376` | human | 0.100 |  |
+| MF04 | malformed | text is only punctuation | 200 | `e8fc63af-10c4-44a2-a86f-c17e55188c20` | human | 0.207 |  |
+| MF05 | malformed | text is a very long single word | 200 | `fdd83025-c4d5-485a-b762-c377377d34cb` | ai | 0.699 |  |
+| MF06 | malformed | text is emoji only | 200 | `df81f4f9-baec-4ef0-8928-829f6c3f7971` | ai | 0.798 |  |
+| MF07 | malformed | text is right-to-left script | 200 | `fa16a5dd-fabc-432f-b355-26b0c0aa1044` | ai | 0.744 |  |
+| MF08 | malformed | text is 60,000 characters | 200 | `19095bc8-6e85-4c4d-b3c5-b51a03636363` | ai | 0.931 |  |
+| RQ01 | malformed | no text field at all | 400 | `—` | — | — |  |
+| RQ02 | malformed | no creator_id | 400 | `—` | — | — |  |
+| RQ03 | malformed | text is a number | 400 | `—` | — | — |  |
+| RQ04 | malformed | text is a list | 400 | `—` | — | — |  |
+| RQ05 | malformed | text is null | 400 | `—` | — | — |  |
+| RQ06 | malformed | creator_id is an object | 400 | `—` | — | — |  |
+| RQ07 | malformed | body is a JSON array, not an object | 400 | `—` | — | — |  |
+| RQ08 | malformed | body is unparseable JSON | 400 | `—` | — | — |  |
+| RQ09 | malformed | body is empty | 400 | `—` | — | — |  |
+| RQ10 | malformed | body is form-encoded, not JSON | 429 | `—` | — | — |  |
+| RQ11 | malformed | body is JSON claiming to be plain text | 429 | `—` | — | — |  |
+| RQ12 | malformed | deeply nested JSON | 400 | `—` | — | — |  |
+| FL01_01 | flood_same_creator | 20 rapid submissions from one creator | 200 | `27c3e8b9-c8c0-4a2d-89b1-65062f85991d` | human | 0.117 |  |
+| FL01_02 | flood_same_creator | 20 rapid submissions from one creator | 200 | `02685384-c66e-444b-9529-042c60588e1c` | human | 0.117 |  |
+| FL01_03 | flood_same_creator | 20 rapid submissions from one creator | 200 | `a581916c-f718-4b4e-b44e-ce94c8ec5000` | human | 0.117 |  |
+| FL01_04 | flood_same_creator | 20 rapid submissions from one creator | 200 | `6b113f91-9718-40ea-94a1-97e5a69a3cb8` | human | 0.117 |  |
+| FL01_05 | flood_same_creator | 20 rapid submissions from one creator | 200 | `f1d60fa6-b0a3-4818-affd-ec534137fda9` | human | 0.117 |  |
+| FL01_06 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_07 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_08 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_09 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_10 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_11 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+| FL01_12 | flood_same_creator | 20 rapid submissions from one creator | 429 | `—` | — | — |  |
+
+---
+
+## By family
+
+| Family | Attacks | Auto-BROKE | Left to judge |
+|---|---|---|---|
+| `evasion` | 10 | 10 | 0 |
+| `false_positive` | 8 | 8 | 0 |
+| `flood_same_creator` | 12 | 0 | 12 |
+| `malformed` | 20 | 1 | 19 |
+| `prompt_injection` | 6 | 6 | 0 |
+
+> The **false_positive** family is the one to look at hardest. Those are
+> written to be genuine human writing that reads as machine-like. Every one
+> your service calls AI is a real writer it would have accused.
+
+---
+
+## What came back
+
+The detail behind the table. Paste the interesting failures into your
+README — the ones that show something, not the ten easiest.
+
+### EV01 — `evasion`
+
+*Targeting:* signal two: typos raise word variety
+
+```json
+{
+  "id": "EV01",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV01",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV02 — `evasion`
+
+*Targeting:* signal two: broken-up sentences raise length spread
+
+```json
+{
+  "id": "EV02",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV02",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV03 — `evasion`
+
+*Targeting:* signal two: a pasted quotation changes the shape
+
+```json
+{
+  "id": "EV03",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV03",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV04 — `evasion`
+
+*Targeting:* signal one: unusual words raise perplexity
+
+```json
+{
+  "id": "EV04",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV04",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV05 — `evasion`
+
+*Targeting:* both signals: heavy human editing pass
+
+```json
+{
+  "id": "EV05",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV05",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV06 — `evasion`
+
+*Targeting:* signal two: one very long sentence and one very short
+
+```json
+{
+  "id": "EV06",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV06",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV07 — `evasion`
+
+*Targeting:* signal two: padding with punctuation
+
+```json
+{
+  "id": "EV07",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV07",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV08 — `evasion`
+
+*Targeting:* signal one: text below the token window
+
+```json
+{
+  "id": "EV08",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV08",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV09 — `evasion`
+
+*Targeting:* both: AI text with a human opening paragraph bolted on
+
+```json
+{
+  "id": "EV09",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV09",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### EV10 — `evasion`
+
+*Targeting:* signal two: repeated stanza structure
+
+```json
+{
+  "id": "EV10",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_EV10",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP01 — `false_positive`
+
+*Targeting:* plain, clear human writing with no flourishes
+
+```json
+{
+  "id": "FP01",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP01",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP02 — `false_positive`
+
+*Targeting:* human writing in a formal register
+
+```json
+{
+  "id": "FP02",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP02",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP03 — `false_positive`
+
+*Targeting:* a non-native English speaker writing carefully
+
+```json
+{
+  "id": "FP03",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP03",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP04 — `false_positive`
+
+*Targeting:* a student essay written to a rubric
+
+```json
+{
+  "id": "FP04",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP04",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP05 — `false_positive`
+
+*Targeting:* technical documentation written by a person
+
+```json
+{
+  "id": "FP05",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP05",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP06 — `false_positive`
+
+*Targeting:* a person imitating a formal template
+
+```json
+{
+  "id": "FP06",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP06",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP07 — `false_positive`
+
+*Targeting:* human writing that repeats a phrase deliberately
+
+```json
+{
+  "id": "FP07",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP07",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### FP08 — `false_positive`
+
+*Targeting:* very short genuine human submission
+
+```json
+{
+  "id": "FP08",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_FP08",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI01 — `prompt_injection`
+
+*Targeting:* instruction to ignore the check
+
+```json
+{
+  "id": "PI01",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI01",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI02 — `prompt_injection`
+
+*Targeting:* instruction disguised as a system message
+
+```json
+{
+  "id": "PI02",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI02",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI03 — `prompt_injection`
+
+*Targeting:* instruction wrapped in the writer's voice
+
+```json
+{
+  "id": "PI03",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI03",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI04 — `prompt_injection`
+
+*Targeting:* attempt to make the label text hostile
+
+```json
+{
+  "id": "PI04",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI04",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI05 — `prompt_injection`
+
+*Targeting:* attempt to inject into the audit log
+
+```json
+{
+  "id": "PI05",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI05",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### PI06 — `prompt_injection`
+
+*Targeting:* instruction plus real human text
+
+```json
+{
+  "id": "PI06",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_PI06",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### MF01 — `malformed`
+
+*Targeting:* text is only whitespace
+
+```json
+{
+  "id": "MF01",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_MF01",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF02 — `malformed`
+
+*Targeting:* text is a single character
+
+```json
+{
+  "id": "MF02",
+  "status": null,
+  "content_id": null,
+  "creator_id": "attacker_MF02",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": "ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+  "verdict": "BROKE"
+}
+```
+
+### MF03 — `malformed`
+
+*Targeting:* text is control characters
+
+```json
+{
+  "id": "MF03",
+  "status": 200,
+  "content_id": "995df7c0-6695-470d-8d63-7a02694db376",
+  "creator_id": "attacker_MF03",
+  "guess": "human",
+  "confidence": 0.1,
+  "model_score": 0.0,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF04 — `malformed`
+
+*Targeting:* text is only punctuation
+
+```json
+{
+  "id": "MF04",
+  "status": 200,
+  "content_id": "e8fc63af-10c4-44a2-a86f-c17e55188c20",
+  "creator_id": "attacker_MF04",
+  "guess": "human",
+  "confidence": 0.2067,
+  "model_score": 0.0112,
+  "style_score": 0.5,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF05 — `malformed`
+
+*Targeting:* text is a very long single word
+
+```json
+{
+  "id": "MF05",
+  "status": 200,
+  "content_id": "fdd83025-c4d5-485a-b762-c377377d34cb",
+  "creator_id": "attacker_MF05",
+  "guess": "ai",
+  "confidence": 0.6986,
+  "model_score": 0.9976,
+  "style_score": 0.25,
+  "label": "We think this was probably written with AI, but this estimate can be wrong.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF06 — `malformed`
+
+*Targeting:* text is emoji only
+
+```json
+{
+  "id": "MF06",
+  "status": 200,
+  "content_id": "df81f4f9-baec-4ef0-8928-829f6c3f7971",
+  "creator_id": "attacker_MF06",
+  "guess": "ai",
+  "confidence": 0.7981,
+  "model_score": 0.9969,
+  "style_score": 0.5,
+  "label": "We think this was probably written with AI, but this estimate can be wrong.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF07 — `malformed`
+
+*Targeting:* text is right-to-left script
+
+```json
+{
+  "id": "MF07",
+  "status": 200,
+  "content_id": "fa16a5dd-fabc-432f-b355-26b0c0aa1044",
+  "creator_id": "attacker_MF07",
+  "guess": "ai",
+  "confidence": 0.7438,
+  "model_score": 0.9064,
+  "style_score": 0.5,
+  "label": "We think this was probably written with AI, but this estimate can be wrong.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### MF08 — `malformed`
+
+*Targeting:* text is 60,000 characters
+
+```json
+{
+  "id": "MF08",
+  "status": 200,
+  "content_id": "19095bc8-6e85-4c4d-b3c5-b51a03636363",
+  "creator_id": "attacker_MF08",
+  "guess": "ai",
+  "confidence": 0.9313,
+  "model_score": 0.9876,
+  "style_score": 0.8469,
+  "label": "We think this was probably written with AI, but this estimate can be wrong.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ01 — `malformed`
+
+*Targeting:* no text field at all
+
+```json
+{
+  "id": "RQ01",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_RQ01",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ02 — `malformed`
+
+*Targeting:* no creator_id
+
+```json
+{
+  "id": "RQ02",
+  "status": 400,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ03 — `malformed`
+
+*Targeting:* text is a number
+
+```json
+{
+  "id": "RQ03",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_RQ03",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ04 — `malformed`
+
+*Targeting:* text is a list
+
+```json
+{
+  "id": "RQ04",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_RQ04",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ05 — `malformed`
+
+*Targeting:* text is null
+
+```json
+{
+  "id": "RQ05",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_RQ05",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ06 — `malformed`
+
+*Targeting:* creator_id is an object
+
+```json
+{
+  "id": "RQ06",
+  "status": 400,
+  "content_id": null,
+  "creator_id": {
+    "id": "x"
+  },
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ07 — `malformed`
+
+*Targeting:* body is a JSON array, not an object
+
+```json
+{
+  "id": "RQ07",
+  "status": 400,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ08 — `malformed`
+
+*Targeting:* body is unparseable JSON
+
+```json
+{
+  "id": "RQ08",
+  "status": 400,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ09 — `malformed`
+
+*Targeting:* body is empty
+
+```json
+{
+  "id": "RQ09",
+  "status": 400,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ10 — `malformed`
+
+*Targeting:* body is form-encoded, not JSON
+
+```json
+{
+  "id": "RQ10",
+  "status": 429,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ11 — `malformed`
+
+*Targeting:* body is JSON claiming to be plain text
+
+```json
+{
+  "id": "RQ11",
+  "status": 429,
+  "content_id": null,
+  "creator_id": null,
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### RQ12 — `malformed`
+
+*Targeting:* deeply nested JSON
+
+```json
+{
+  "id": "RQ12",
+  "status": 400,
+  "content_id": null,
+  "creator_id": "attacker_RQ12",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_01 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_01",
+  "status": 200,
+  "content_id": "27c3e8b9-c8c0-4a2d-89b1-65062f85991d",
+  "creator_id": "attacker_flood",
+  "guess": "human",
+  "confidence": 0.1172,
+  "model_score": 0.0287,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_02 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_02",
+  "status": 200,
+  "content_id": "02685384-c66e-444b-9529-042c60588e1c",
+  "creator_id": "attacker_flood",
+  "guess": "human",
+  "confidence": 0.1172,
+  "model_score": 0.0287,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_03 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_03",
+  "status": 200,
+  "content_id": "a581916c-f718-4b4e-b44e-ce94c8ec5000",
+  "creator_id": "attacker_flood",
+  "guess": "human",
+  "confidence": 0.1172,
+  "model_score": 0.0287,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_04 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_04",
+  "status": 200,
+  "content_id": "6b113f91-9718-40ea-94a1-97e5a69a3cb8",
+  "creator_id": "attacker_flood",
+  "guess": "human",
+  "confidence": 0.1172,
+  "model_score": 0.0287,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_05 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_05",
+  "status": 200,
+  "content_id": "f1d60fa6-b0a3-4818-affd-ec534137fda9",
+  "creator_id": "attacker_flood",
+  "guess": "human",
+  "confidence": 0.1172,
+  "model_score": 0.0287,
+  "style_score": 0.25,
+  "label": "We think this was probably written by a person.",
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_06 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_06",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_07 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_07",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_08 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_08",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_09 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_09",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_10 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_10",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_11 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_11",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```
+
+### FL01_12 — `flood_same_creator`
+
+*Targeting:* 20 rapid submissions from one creator
+
+```json
+{
+  "id": "FL01_12",
+  "status": 429,
+  "content_id": null,
+  "creator_id": "attacker_flood",
+  "guess": null,
+  "confidence": null,
+  "model_score": null,
+  "style_score": null,
+  "label": null,
+  "error": null,
+  "verdict": ""
+}
+```

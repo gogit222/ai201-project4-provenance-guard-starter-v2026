@@ -244,7 +244,23 @@ when no usable ID is provided.
 <!-- python run_attacks.py --flood 15 -->
 
 ```
+[ 1/15] 200
+[ 2/15] 200
+[ 3/15] 200
+[ 4/15] 200
+[ 5/15] 200
+[ 6/15] 429
+[ 7/15] 429
+[ 8/15] 429
+[ 9/15] 429
+[10/15] 429
+[11/15] 429
+[12/15] 429
+[13/15] 429
+[14/15] 429
+[15/15] 429
 
+200 200 200 200 200 429 429 429 429 429 429 429 429 429 429
 ```
 
 ---
@@ -255,6 +271,71 @@ when no usable ID is provided.
      `run_attacks.py --label before` produces the table. -->
 
 
+
+Run: `results/attack_run_2026-11-05_0949_before.md`, 56 attacks. `BROKE`
+means the service failed to give a usable result or accepted a test input that
+the route should reject. `HELD` means the request was rejected or the flood was
+stopped at its configured allowance. The flood's first five requests were
+within quota; the subsequent requests got 429.
+
+| ID | Outcome | Mark |
+|---|---|---|
+| EV01 | Connection reset; no HTTP response | BROKE |
+| EV02 | Connection reset; no HTTP response | BROKE |
+| EV03 | Connection reset; no HTTP response | BROKE |
+| EV04 | Connection reset; no HTTP response | BROKE |
+| EV05 | Connection reset; no HTTP response | BROKE |
+| EV06 | Connection reset; no HTTP response | BROKE |
+| EV07 | Connection reset; no HTTP response | BROKE |
+| EV08 | Connection reset; no HTTP response | BROKE |
+| EV09 | Connection reset; no HTTP response | BROKE |
+| EV10 | Connection reset; no HTTP response | BROKE |
+| FP01 | Connection reset; no HTTP response | BROKE |
+| FP02 | Connection reset; no HTTP response | BROKE |
+| FP03 | Connection reset; no HTTP response | BROKE |
+| FP04 | Connection reset; no HTTP response | BROKE |
+| FP05 | Connection reset; no HTTP response | BROKE |
+| FP06 | Connection reset; no HTTP response | BROKE |
+| FP07 | Connection reset; no HTTP response | BROKE |
+| FP08 | Connection reset; no HTTP response | BROKE |
+| PI01 | Connection reset; no HTTP response | BROKE |
+| PI02 | Connection reset; no HTTP response | BROKE |
+| PI03 | Connection reset; no HTTP response | BROKE |
+| PI04 | Connection reset; no HTTP response | BROKE |
+| PI05 | Connection reset; no HTTP response | BROKE |
+| PI06 | Connection reset; no HTTP response | BROKE |
+| MF01 | HTTP 400; whitespace rejected | HELD |
+| MF02 | Connection reset; no HTTP response | BROKE |
+| MF03 | HTTP 200; control characters scored human, 0.100 | BROKE |
+| MF04 | HTTP 200; punctuation-only scored human, 0.207 | BROKE |
+| MF05 | HTTP 200; long single word scored AI, 0.699 | BROKE |
+| MF06 | HTTP 200; emoji-only scored AI, 0.798 | BROKE |
+| MF07 | HTTP 200; right-to-left text scored AI, 0.744 | BROKE |
+| MF08 | HTTP 200; 60,000-character text scored AI, 0.931 | BROKE |
+| RQ01 | HTTP 400; missing text rejected | HELD |
+| RQ02 | HTTP 400; missing creator_id rejected | HELD |
+| RQ03 | HTTP 400; numeric text rejected | HELD |
+| RQ04 | HTTP 400; list text rejected | HELD |
+| RQ05 | HTTP 400; null text rejected | HELD |
+| RQ06 | HTTP 400; object creator_id rejected | HELD |
+| RQ07 | HTTP 400; JSON array rejected | HELD |
+| RQ08 | HTTP 400; invalid JSON rejected | HELD |
+| RQ09 | HTTP 400; empty body rejected | HELD |
+| RQ10 | HTTP 429; rate-limited using fallback identity `unknown` | HELD |
+| RQ11 | HTTP 429; rate-limited using fallback identity `unknown` | HELD |
+| RQ12 | HTTP 400; deeply nested JSON rejected | HELD |
+| FL01_01 | HTTP 200; accepted within five-request allowance | HELD |
+| FL01_02 | HTTP 200; accepted within five-request allowance | HELD |
+| FL01_03 | HTTP 200; accepted within five-request allowance | HELD |
+| FL01_04 | HTTP 200; accepted within five-request allowance | HELD |
+| FL01_05 | HTTP 200; accepted within five-request allowance | HELD |
+| FL01_06 | HTTP 429; over-limit request rejected | HELD |
+| FL01_07 | HTTP 429; over-limit request rejected | HELD |
+| FL01_08 | HTTP 429; over-limit request rejected | HELD |
+| FL01_09 | HTTP 429; over-limit request rejected | HELD |
+| FL01_10 | HTTP 429; over-limit request rejected | HELD |
+| FL01_11 | HTTP 429; over-limit request rejected | HELD |
+| FL01_12 | HTTP 429; over-limit request rejected | HELD |
 
 **Ten selected audit log entries**
 
@@ -299,19 +380,32 @@ accused them; it shows the service failed before deciding.
 
 <!-- Your five criteria across three trials. `run_eval.py --label before`. -->
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+Report: `results/run_2026-11-05_0951_before.md`, produced by
+`run_eval.py::main`.
+
+| Criterion | Target | Trial 1 | Trial 2 | Trial 3 | Overall |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. My own writing | At most 1/10 labeled high-confidence AI in every trial | 0/10, MET | 0/10, MET | 0/10, MET | MET |
+| 2. AI versus human score spread | Mean AI score at least 0.20 above mean human score in every trial | Gap 0.3833, MET | 500 and connection reset left the comparison incomplete, MISSED | Gap 0.3833, MET | MISSED |
+| 3. Label coverage | At least one human, unsure, and AI label in every trial | Human and unsure only, MISSED | Human and unsure only; no AI label, MISSED | Human and unsure only, MISSED | MISSED |
+| 4. Appeal round-trip | Five successful appeals, recorded with the original decisions preserved | 5/5, MET | 5/5, MET | Two submissions returned 500 and could not be appealed, MISSED | MISSED |
+| 5. Malformed input and health | Required invalid inputs return 4xx, no 5xx, health remains 200 | 4xx; health 200, MET | 4xx; health 200, MET | 4xx; health 200, MET | MET |
 
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
 
 ```json
-
+{
+     "report": "results/run_2026-11-05_0951_before.md",
+     "producer": "run_eval.py::main",
+     "criterion": "AI versus human score spread",
+     "trial": 1,
+     "clearly_ai_mean": 0.60068,
+     "clearly_human_mean": 0.2174,
+     "gap": 0.38328,
+     "target_gap": 0.20,
+     "verdict": "MET"
+}
 ```
 
 **Diagnoses**
@@ -330,24 +424,77 @@ that produced it:
 
      Look for a pattern. Five failures on one signal is one problem, not five. -->
 
+Criterion 2 missed overall because Trial 2 did not produce all ten scores: an
+AI sample returned HTTP 500 and a later request reset the connection. Stage:
+route/inference boundary, before combining. Mechanism: the request failed
+before both signal values and a combined score could be returned, so the
+five-versus-five comparison is incomplete rather than evidence of a bad
+threshold.
+
+Criterion 3 missed in all three trials. Stage: label mapping. Mechanism: the
+AI-like samples that were scored reached 0.5898 and 0.6383, both below the
+0.65 AI cutoff, so they mapped to `unsure`; the trials produced no high-
+confidence AI label.
+
+Criterion 4 missed in Trial 3. Stage: route/inference boundary, before a
+`content_id` exists. Mechanism: two submissions returned HTTP 500, so those
+requests could not enter the appeal flow. The appeal handler did record
+successful appeals and preserve their original decisions.
+
+The 24 evasion, false-positive, and prompt-injection cases, plus MF02, all
+ended in connection resets with no scores. Stage: route/inference boundary.
+Mechanism: the service closed the connection before returning an HTTP result;
+these cases therefore show service failures, not demonstrated detector
+bypasses or false accusations.
+
+MF03-MF08 returned scored decisions for control-only, punctuation-only,
+single-word, emoji-only, right-to-left, and 60,000-character text. Stage:
+route validation and input policy. Mechanism: current validation checks type,
+blankness, and a 100,000-character maximum, but does not define whether these
+content forms are meaningful or supported.
+
+The flood was held after five accepted requests with 429 responses. The
+remaining risk is not this single-process test but the in-memory limiter: a
+restart or another worker does not share the same counters.
+
 
 
 ---
 
 ## The Improvement
-
+**What I changed:** The `/submit` path checks that the body is a JSON object,
+validates `text` and `creator_id`, rejects blank or over-100,000-character
+text before inference, and maps detector `ValueError` and `DetectorUnavailable`
+exceptions to JSON 400 and 503 responses. The rate-limit key also handles
+non-object JSON safely, and rejected rate-limited requests are written to the
+audit log.
 **What I changed:**
+**Why:** The failures and malformed inputs occur at the route/inference
+boundary, before scores or labels exist. Request validation and explicit error
+responses keep those cases out of scoring and make rejections observable; they
+do not change the detector's thresholds or claim to fix its classification
+limits.
 
+**Which diagnosis pointed at it:** The route/inference failures and the
+malformed-request cases in the before run. This is request-path hardening, not
+a detector improvement.
 **Which diagnosis pointed at it:**
 
 ### Attack Run — After
-
+No `run_attacks.py --label after` report is present in the workspace, so there
+is no verified post-change outcome table. I will not reuse the before results
+as after results. Run the full attack set with the `after` label and paste its
+56 outcomes here before claiming the improvement held.
 <!-- Same format. `run_attacks.py --label after` -->
 
 
 
-**Did it help, and how do I know:**
-
+The code now returns explicit client or service errors for the handled request
+and detector exceptions, and the recorded rate-limit tests show 429 responses
+and rejection audit entries. The attack/evaluation reports in this workspace
+are explicitly labeled `before`; without a post-change full run I cannot claim
+that the connection-reset cases were fixed or quantify a change in attack
+outcomes.
 <!-- Widening the unsure band usually fixes one problem and creates another.
      Reporting that trade honestly is worth full credit. -->
 
